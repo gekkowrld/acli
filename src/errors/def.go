@@ -6,16 +6,15 @@ import (
 )
 
 type errorType struct {
-	Error    string
+	Error     string
 	ErrorCode int
 }
-
 
 // Initialize and populate the error map
 var errMap = map[int]errorType{
 	1: {"Unkown Error Occured", 1},
 	2: {"Permission denied", 2},
-    3: {"Not a git repository", 3},
+	3: {"Not a git repository", 3},
 }
 
 // Display errors and exit after that
@@ -37,4 +36,3 @@ func DispError(errorCode int) {
 		fmt.Println("Unknown Error Occured")
 	}
 }
-

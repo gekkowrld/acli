@@ -16,11 +16,11 @@ package git
 
 import (
 	"fmt"
+	"github.com/gekkowrld/acli/src/config"
 	"os"
 	"os/exec"
 	"sort"
 	"strings"
-    "github.com/gekkowrld/acli/src/config"
 )
 
 var osExit = os.Exit
@@ -42,7 +42,7 @@ func AuthorsList(projectname string) string {
 	header := getHeader(projectname)
 	authors := getAuthors()
 
-    return strAuthors(header, authors)
+	return strAuthors(header, authors)
 }
 
 // getAuthors returns authors in this project.
@@ -53,7 +53,7 @@ func getAuthors() []string {
 
 // getAuthorsAlphabeticalOrder returs authors name and authors mail address in alphabetical order
 func getAuthorsAlphabeticalOrder() []string {
-	out, err := exec.Command("git","-C", config.Path.GitRoot , "log", "--pretty=format:%an <%ae>").Output()
+	out, err := exec.Command("git", "-C", config.Path.GitRoot, "log", "--pretty=format:%an <%ae>").Output()
 	if err != nil {
 		die(err.Error())
 	}
@@ -64,13 +64,13 @@ func getAuthorsAlphabeticalOrder() []string {
 	return list
 }
 func getHeader(pn string) string {
-    // Header as shown by Google:
-    // opensource.google/documentation/reference/releasing/authors/
-    // and Moby:
-    // github.com/moby/moby
-    rs := fmt.Sprintf("# This is the list of %s's contributors.\n", pn)
-    rs += fmt.Sprintf("# This does not necessarily list everyone who has contributed code.\n")
-    rs += fmt.Sprintf("# To see the full list of contributors, see the revision history in\n# source control.\n")
+	// Header as shown by Google:
+	// opensource.google/documentation/reference/releasing/authors/
+	// and Moby:
+	// github.com/moby/moby
+	rs := fmt.Sprintf("# This is the list of %s's contributors.\n", pn)
+	rs += fmt.Sprintf("# This does not necessarily list everyone who has contributed code.\n")
+	rs += fmt.Sprintf("# To see the full list of contributors, see the revision history in\n# source control.\n")
 	return rs
 }
 
@@ -101,12 +101,12 @@ func die(msg string) {
 
 // create Author File string representation
 func strAuthors(header string, authors []string) string {
-        var rt string
-        var au string
-        for _, txt := range authors {
-                au += fmt.Sprintf("%s\n", txt)
-        }
-        rt = fmt.Sprintf("%s\n%s", header, au)
+	var rt string
+	var au string
+	for _, txt := range authors {
+		au += fmt.Sprintf("%s\n", txt)
+	}
+	rt = fmt.Sprintf("%s\n%s", header, au)
 
-        return rt
+	return rt
 }

@@ -25,7 +25,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "acli",
 	Short: "A simple tool to help generate files required by ALX projects",
-	Long:  `A simple tool to help generate files required by ALX projects
+	Long: `A simple tool to help generate files required by ALX projects
 
 Generate project file structure one by one or all at once easily.
 The tool uses only the available file structure from Github repositories to generate the files.
