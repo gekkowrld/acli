@@ -20,13 +20,17 @@ import (
 	"fmt"
 	"github.com/gekkowrld/acli/assets"
 	"github.com/gekkowrld/acli/src/config"
+	log "github.com/gekkowrld/acli/src/errors"
 	"gopkg.in/yaml.v3"
-	"log"
+	"os"
 	"path/filepath"
 	"strings"
+	"github.com/mattn/go-isatty"
 
 	"github.com/spf13/cobra"
 )
+
+var dispColour bool
 
 // taskCmd represents the task command
 var taskCmd = &cobra.Command{
@@ -50,6 +54,9 @@ var taskCmd = &cobra.Command{
 		noInitdata := cmd.Flag("no-initdata").Changed
 		overwrite := cmd.Flag("overwrite").Changed
 		noReadme := cmd.Flag("no-readme").Changed
+		noColour := cmd.Flag("no-colour").Changed
+
+		dispColour = isColour(noColour)
 
 		// Do something if the directory is passed
 		if dirName.Changed {
@@ -94,7 +101,7 @@ func setRepresenatation() Projects {
 	var projects Projects
 	err := yaml.Unmarshal([]byte(yamlData), &projects)
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		log.Error(err, dispColour)
 	}
 
 	return projects
@@ -121,11 +128,34 @@ func handleFileCreation(repr Projects, fileID string, noInitdata bool, overwrite
 				}
 				break
 			} else {
-				fmt.Printf("Couldn't find where the file belongs to, please check again")
+				errMsg := fmt.Sprintf("%s: Couldn't find where the file belongs to, please go to the correct location", config.Path.WorkingDir)
+				log.Error(errMsg, dispColour)
 			}
 		}
 	}
 
+}
+
+func isColour(isColour bool) bool {
+    // Check if the NO_COLOR environment variable is set
+    noColorEnv := os.Getenv("NO_COLOR")
+
+    // Check if the output is being redirected or if the terminal doesn't support color
+    isTerminal := isatty.IsTerminal(os.Stdout.Fd())
+    isRedirected := !isatty.IsTerminal(os.Stderr.Fd())
+
+    // If the environment variable is set or the output is redirected, disable color
+    if noColorEnv != "" || isRedirected {
+        return false
+    }
+
+    // If the CLI flag is explicitly set to disable color, disable it
+    if isColour {
+        return false
+    }
+
+    // If none of the above conditions are met, enable color
+    return isTerminal
 }
 
 // Create a directory when the user requests so
@@ -145,6 +175,8 @@ func handleDirCreation(repr Projects, dirID string, noReadme bool, overwrite boo
 				}
 			}
 		}
+		errMsg := fmt.Sprintf("%s: Couldn't find where the directory belongs to, please go to the correct location", config.Path.WorkingDir)
+		log.Error(errMsg, dispColour)
 	}
 }
 
@@ -156,4 +188,5 @@ func init() {
 	taskCmd.Flags().String("dir", "", "Create a directory based on the id e.g 0x00")
 	taskCmd.Flags().String("file", "", "Create a file based on the id e.g 1")
 	taskCmd.Flags().BoolP("overwrite", "o", false, "Don't warn about existance of a file or directory, just overwrite it")
+	taskCmd.Flags().BoolP("no-colour", "c", false, "Don't output with colours (Partial conformity to https://no-color.org/)")
 }
