@@ -6,7 +6,7 @@ import (
 	git "github.com/go-git/go-git/v5"
 	"path/filepath"
 	"regexp"
-    "strings"
+	"strings"
 )
 
 type gi struct {
@@ -74,8 +74,8 @@ func extractRepoName(url string) (string, error) {
 	if len(matches) < 2 {
 		return "", fmt.Errorf("could not extract repository name from URL")
 	}
-    reponame := matches[1]
-    reponame = strings.Split(reponame, "/")[1]
+	reponame := matches[1]
+	reponame = strings.Split(reponame, "/")[1]
 
 	// The repository name is the last part of the match
 	return reponame, nil

@@ -51,3 +51,39 @@ func getGitRoot() string {
 		wd = parent
 	}
 }
+
+// Check whether a file or dir is found.
+// The checks for file and dir as pointed here may introduce
+// race condition, though in this usecase it is not really that big
+// of a problem.
+// Comment: https://stackoverflow.com/questions/10510691/how-to-check-whether-a-file-or-directory-exists#comment49481203_10510691
+// Answer: https://stackoverflow.com/a/10510783
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+// Check if the path given is a directory (only a dir)
+func DirExists(dirName string) bool {
+	info, err := os.Stat(dirName)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return info.IsDir()
+}
+
+// Check exclusively for a file
+func FileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+
+	return !info.IsDir()
+}

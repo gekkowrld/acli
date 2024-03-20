@@ -4,6 +4,8 @@ A simple tool designed to streamline the process of generating files required by
 This tool allows you to generate the project file structure either one by one or all at once, making it easier to manage your project's structure.
 It utilizes the available file structure from GitHub repositories to generate the necessary files.
 
+When creating files/directories, only the unique hexadecimal/decimal numbers are allowed.
+
 ## Help
 
 ```txt

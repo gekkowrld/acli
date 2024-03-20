@@ -1,0 +1,81 @@
+# A simple representation of a directory structure
+# This is for representation of the ALX School Curriculum
+# Note: I don't have the full curriculum, so I'll just represent a few directories
+# If you want to learn more about ALX School, visit https://www.alxafrica.com/
+# The file structure is from Github repositories and not the official ALX School Curriculum
+# The official curriculum is not open source (not publicly available)
+
+# Initial data includes the contents that are expected to be in the file
+# This is not the actual assignment, this is limited to only useful
+# comments and shebangs (if any)
+# Inclusion of any solutions is not allowed by both the ALX School
+# and the spirit of the project and learning
+# Only include information that is "boilerplate" and not the actual
+# solution
+
+projects:
+  - name: alx-low_level_programming
+    description: "Low Level Programming"
+    directories:
+      - name: 0x00-hello_world
+        description: "C - Hello, World"
+        id: 0x00
+        files:
+          - name: 0-preprocessor
+            description: "Write a script that runs a C file through the preprocessor and save the result into another file."
+            id: 0
+
+            init_data: |
+              #!/bin/bash
+
+          - name: 1-compiler
+            description: "Write a script that compiles a C file but does not link."
+            id: 1
+
+            init_data: |
+              #!/bin/bash
+
+          - name: 2-assembler
+            description: "Write a script that generates the assembly code of a C code and save it in an output file."
+            id: 2
+
+            init_data: |
+              #!/bin/bash
+
+          - name: 3-name
+            description: "Write a script that compiles a C file and creates an executable named cisfun."
+            id: 3
+
+            init_data: |
+              #!/bin/bash
+
+          - name: 4-puts.c
+            description: "Write a C program that prints exactly \"Programming is like building a multilingual puzzle"
+            id: 4
+
+            init_data: ""
+
+          - name: 5-printf.c
+            description: "Write a C program that prints exactly with proper grammar, but the outcome is a piece of art,"
+            id: 5
+
+            init_data: ""
+
+          - name: 6-size.c
+            description: "Write a C program that prints the size of various types on the computer it is compiled and run on."
+            id: 6
+
+            init_data: ""
+
+          - name: 100-intel
+            description: "Write a script that generates the assembly code (Intel syntax) of a C code and save it in an output file."
+            id: 100
+
+            init_data: |
+              #!/bin/bash
+
+          - name: 101-quote.c
+            description: "Write a C program that prints exactly and that piece of art is useful\" - Dora Korpar, 2015-10-19"
+            id: 101
+
+            init_data: ""
