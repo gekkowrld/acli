@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/gekkowrld/acli/assets"
 	"github.com/gekkowrld/acli/src/config"
+	"github.com/gekkowrld/acli/src/git"
 	log "github.com/gekkowrld/acli/src/errors"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -40,6 +41,10 @@ var taskCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Set up the path to be used later
 		config.SetPath()
+		git.SetGitInfo()
+		if !git.IsGitRepo() {
+			log.ExitError(3)
+		}
 		repr := setRepresenatation()
 
 		// Get the last part of the path
@@ -95,8 +100,7 @@ type Project struct {
 // Set the representation of the data to a struct
 func setRepresenatation() Projects {
 	// get the data from an embed.
-	// Hardcode the filename for now
-	yamlData := assets.AssetsString("dir")
+	yamlData := assets.AssetsString(git.GitInfo.RepoName)
 
 	var projects Projects
 	err := yaml.Unmarshal([]byte(yamlData), &projects)

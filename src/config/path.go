@@ -39,6 +39,9 @@ func getGitRoot() string {
 	// If the lookup reaches the root directory
 	// where the current directory and the previous directory are
 	// the same and .git is not found then bail out with an error.
+	// As show in this Stack Overflow question, my solution is not
+	// there but it works for this use case.
+	// https://stackoverflow.com/questions/957928/
 	for {
 		gitDir := filepath.Join(wd, ".git")
 		if _, err := os.Stat(gitDir); err == nil {
