@@ -11,12 +11,8 @@ builds:
       - linux
       - windows
       - darwin
-      - android
     ldflags:
       - "-s -w"
-    ignore:
-      - goos: android
-        goarch: 386
 
 archives:
   - format: tar.gz
