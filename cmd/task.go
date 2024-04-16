@@ -218,8 +218,8 @@ func handleDirCreation(vrt inputVar) {
 			}
 		}
 		if !found {
-		errMsg := fmt.Sprintf("%s: Couldn't find where the %s belongs to, please go to the correct location", config.Path.WorkingDir, git.GitInfo.RepoName)
-		log.Error(errMsg, vrt.Colour)
+			errMsg := fmt.Sprintf("%s: Couldn't find where the %s belongs to, please go to the correct location", config.Path.WorkingDir, git.GitInfo.RepoName)
+			log.Error(errMsg, vrt.Colour)
 		}
 	}
 }
