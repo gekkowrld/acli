@@ -16,10 +16,11 @@ type gi struct {
 var GitInfo gi
 
 func IsGitRepo() bool {
-	repoDir := config.Path.WorkingDir
+	repoDir := config.Path.GitRoot
 
 	_, err := git.PlainOpen(repoDir)
 	if err != nil {
+		fmt.Printf("%v\n", err);
 		return false
 	}
 

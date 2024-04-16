@@ -12,6 +12,7 @@ import (
 // https://github.com/golang/go/issues/51987
 
 //go:embed alx-low_level_programming.yaml
+//go:embed alx-higher_level_programming.yaml
 
 var structure embed.FS
 

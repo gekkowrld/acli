@@ -20,13 +20,13 @@ import (
 	"fmt"
 	"github.com/gekkowrld/acli/assets"
 	"github.com/gekkowrld/acli/src/config"
-	"github.com/gekkowrld/acli/src/git"
 	log "github.com/gekkowrld/acli/src/errors"
+	"github.com/gekkowrld/acli/src/git"
+	"github.com/mattn/go-isatty"
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"strings"
-	"github.com/mattn/go-isatty"
 
 	"github.com/spf13/cobra"
 )
@@ -45,37 +45,50 @@ var taskCmd = &cobra.Command{
 		if !git.IsGitRepo() {
 			log.ExitError(3)
 		}
-		repr := setRepresenatation()
+		var vrt inputVar
+		vrt.Repr = setRepresenatation()
 
 		// Get the last part of the path
 		// Since only Linux (or *nix) is expected, use '/' as a seperator
 		currDir := config.Path.WorkingDir
 
 		pathArr := strings.Split(currDir, "/")
-		lastPart := pathArr[len(pathArr)-1]
+		vrt.LastPart = pathArr[len(pathArr)-1]
 
 		dirName := cmd.Flag("dir")
 		fileName := cmd.Flag("file")
-		noInitdata := cmd.Flag("no-initdata").Changed
-		overwrite := cmd.Flag("overwrite").Changed
-		noReadme := cmd.Flag("no-readme").Changed
+		vrt.InitData = cmd.Flag("no-initdata").Changed
+		vrt.Overwrite = cmd.Flag("overwrite").Changed
+		vrt.Readme = cmd.Flag("no-readme").Changed
 		noColour := cmd.Flag("no-colour").Changed
 
-		dispColour = isColour(noColour)
+		vrt.Colour = isColour(noColour)
 
 		// Do something if the directory is passed
 		if dirName.Changed {
-			handleDirCreation(repr, dirName.Value.String(), noReadme, overwrite, lastPart)
+			vrt.DirName = dirName.Value.String()
+			handleDirCreation(vrt)
 		}
 
 		// Do something if the file is passed
 		if fileName.Changed {
-
-			handleFileCreation(repr, fileName.Value.String(), noInitdata, overwrite, lastPart)
+			vrt.FileName = fileName.Value.String()
+			handleFileCreation(vrt)
 		}
+
 	},
 }
 
+type inputVar struct {
+	Repr      Projects
+	FileName  string
+	InitData  bool
+	Overwrite bool
+	LastPart  string
+	DirName   string
+	Colour    bool
+	Readme    bool
+}
 type Projects struct {
 	Projects []Project `yaml:"projects"`
 }
@@ -112,28 +125,50 @@ func setRepresenatation() Projects {
 }
 
 // Create the file when the user requests
-func handleFileCreation(repr Projects, fileID string, noInitdata bool, overwrite bool, lastPart string) {
+func handleFileCreation(vrt inputVar) {
 	// Use the lastPart as the directory name and then match it with the id that the user passed
-	for _, project := range repr.Projects {
+	var found bool
+	for _, project := range vrt.Repr.Projects {
 		for _, dir := range project.Directories {
-			if dir.Name == lastPart {
+			if dir.Name == vrt.LastPart {
 				for _, file := range dir.Files {
-					if file.ID == fileID {
+					if file.ID == vrt.FileName {
 						pfn := file.Name
 						// Create the file with the content inside
 						var filedata string
-						if !noInitdata {
+						if vrt.InitData {
 							filedata = file.InitData
 						}
 
-						config.CreateFile(pfn, filedata, overwrite)
+						config.CreateFile(pfn, filedata, vrt.Overwrite)
+						// Add some more info into the README file
+						// First check if the line '## Files' is available
+						var msg string
+						cont, err := os.ReadFile("README.md")
+						if err != nil {
+							log.Error(fmt.Sprintf("%s", err), vrt.Colour)
+						}
+						ct := string(cont)
+						msg = ct
+						if !strings.Contains(ct, "## Files") {
+							msg = fmt.Sprintf("%s\n## Files\n", msg)
+						}
+
+						msg = fmt.Sprintf("%s\n- [%s](%s) - %s\n", msg, file.Name, file.Name, file.Description)
+						found = true
+						if !vrt.Readme {
+							readmePath := filepath.Join(config.Path.WorkingDir, "README.md")
+							// For readme, pass true to rewrite the previous file
+							config.CreateFile(readmePath, msg, true)
+						}
 
 					}
 				}
-				break
-			} else {
-				errMsg := fmt.Sprintf("%s: Couldn't find where the file belongs to, please go to the correct location", config.Path.WorkingDir)
-				log.Error(errMsg, dispColour)
+			}
+
+			if !found {
+				errMsg := fmt.Sprintf("%s: Couldn't find where the file belongs to, please go to the correct location", git.GitInfo.RepoName)
+				log.Error(errMsg, vrt.Colour)
 			}
 		}
 	}
@@ -141,46 +176,51 @@ func handleFileCreation(repr Projects, fileID string, noInitdata bool, overwrite
 }
 
 func isColour(isColour bool) bool {
-    // Check if the NO_COLOR environment variable is set
-    noColorEnv := os.Getenv("NO_COLOR")
+	// Check if the NO_COLOR environment variable is set
+	noColorEnv := os.Getenv("NO_COLOR")
 
-    // Check if the output is being redirected or if the terminal doesn't support color
-    isTerminal := isatty.IsTerminal(os.Stdout.Fd())
-    isRedirected := !isatty.IsTerminal(os.Stderr.Fd())
+	// Check if the output is being redirected or if the terminal doesn't support color
+	isTerminal := isatty.IsTerminal(os.Stdout.Fd())
+	isRedirected := !isatty.IsTerminal(os.Stderr.Fd())
 
-    // If the environment variable is set or the output is redirected, disable color
-    if noColorEnv != "" || isRedirected {
-        return false
-    }
+	// If the environment variable is set or the output is redirected, disable color
+	if noColorEnv != "" || isRedirected {
+		return false
+	}
 
-    // If the CLI flag is explicitly set to disable color, disable it
-    if isColour {
-        return false
-    }
+	// If the CLI flag is explicitly set to disable color, disable it
+	if isColour {
+		return false
+	}
 
-    // If none of the above conditions are met, enable color
-    return isTerminal
+	// If none of the above conditions are met, enable color
+	return isTerminal
 }
 
 // Create a directory when the user requests so
-func handleDirCreation(repr Projects, dirID string, noReadme bool, overwrite bool, lastPart string) {
-	for _, project := range repr.Projects {
-		if project.Name == lastPart {
+func handleDirCreation(vrt inputVar) {
+	var found bool
+	for _, project := range vrt.Repr.Projects {
+		if project.Name == git.GitInfo.RepoName {
 			for _, dir := range project.Directories {
-				if dir.ID == dirID {
+				if dir.ID == vrt.DirName {
 					dn := dir.Name
-					config.CreateDir(dn, overwrite)
+					config.CreateDir(dn, vrt.Overwrite)
 					// Create The README.md file
-					if !noReadme {
+					if !vrt.Readme {
 						readmePath := filepath.Join(config.Path.WorkingDir, dn, "README.md")
 						content := fmt.Sprintf("# %s\n\n%s\n", dir.Name, dir.Description)
-						config.CreateFile(readmePath, content, overwrite)
+						config.CreateFile(readmePath, content, true)
 					}
+
+					found = true
 				}
 			}
 		}
-		errMsg := fmt.Sprintf("%s: Couldn't find where the directory belongs to, please go to the correct location", config.Path.WorkingDir)
-		log.Error(errMsg, dispColour)
+		if !found {
+		errMsg := fmt.Sprintf("%s: Couldn't find where the %s belongs to, please go to the correct location", config.Path.WorkingDir, git.GitInfo.RepoName)
+		log.Error(errMsg, vrt.Colour)
+		}
 	}
 }
 
