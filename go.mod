@@ -6,7 +6,7 @@ require (
 	github.com/charmbracelet/log v0.4.0
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/mattn/go-isatty v0.0.20
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
